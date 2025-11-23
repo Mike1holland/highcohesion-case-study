@@ -22,4 +22,18 @@ class DataSourceFactory
             new JsonParser()
         );
     }
+
+    /**
+     * Create a JSONL (JSON Lines) file data source
+     * 
+     * @param string $filePath Path to the JSONL file
+     * @return DataSourceInterface
+     */
+    public static function createJsonLinesFile(string $filePath): DataSourceInterface
+    {
+        return new JsonFileDataSource(
+            new FileDataFetcher($filePath),
+            new JsonLinesParser()
+        );
+    }
 }

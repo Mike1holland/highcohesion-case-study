@@ -35,6 +35,7 @@ class OrderRepositoryIntegrationTest extends TestCase
 
         $this->assertInstanceOf(OrderCollection::class, $orders);
         $this->assertFalse($orders->isEmpty());
+        $this->assertEquals(2, $orders->count());
     }
 
     public function test_orders_have_correct_structure(): void
@@ -42,7 +43,7 @@ class OrderRepositoryIntegrationTest extends TestCase
         $orders = $this->repository->findAll();
         $ordersList = $orders->getOrders();
 
-        $this->assertCount(1, $ordersList);
+        $this->assertCount(2, $ordersList);
 
         $order = $ordersList[0];
         $this->assertEquals('#1001', $order->orderNumber);
@@ -127,5 +128,78 @@ class OrderRepositoryIntegrationTest extends TestCase
         $order = $orders->getOrders()[0];
 
         $this->assertEquals('GBP 315.00', $order->getTotalFormatted());
+    }
+
+    public function test_json_data_source_does_not_support_streaming(): void
+    {
+        $dataSource = DataSourceFactory::createJsonFile($this->ordersFilePath);
+        
+        $this->assertTrue($dataSource->supportsStreaming());
+    }
+
+    public function test_json_stream_method_still_works(): void
+    {
+        $dataSource = DataSourceFactory::createJsonFile($this->ordersFilePath);
+        $generator = $dataSource->stream();
+        
+        $this->assertInstanceOf(\Generator::class, $generator);
+        
+        $orders = [];
+        foreach ($generator as $orderData) {
+            $orders[] = $orderData;
+        }
+        
+        $this->assertCount(2, $orders);
+        $this->assertEquals('#1001', $orders[0]['order_number']);
+        $this->assertEquals('#1002', $orders[1]['order_number']);
+    }
+
+    public function test_json_array_streams_each_element(): void
+    {
+        $dataSource = DataSourceFactory::createJsonFile($this->ordersFilePath);
+        
+        $count = 0;
+        $orderNumbers = [];
+        
+        foreach ($dataSource->stream() as $index => $orderData) {
+            $count++;
+            $orderNumbers[] = $orderData['order_number'];
+        }
+        
+        $this->assertEquals(2, $count);
+        $this->assertEquals(['#1001', '#1002'], $orderNumbers);
+    }
+
+    public function test_streaming_from_json_array_yields_complete_data(): void
+    {
+        $dataSource = DataSourceFactory::createJsonFile($this->ordersFilePath);
+        
+        $firstOrder = null;
+        foreach ($dataSource->stream() as $orderData) {
+            $firstOrder = $orderData;
+            break;
+        }
+        
+        $this->assertNotNull($firstOrder);
+        $this->assertArrayHasKey('order_number', $firstOrder);
+        $this->assertArrayHasKey('title', $firstOrder);
+        $this->assertArrayHasKey('currency', $firstOrder);
+        $this->assertArrayHasKey('total', $firstOrder);
+        $this->assertArrayHasKey('shippingAddress', $firstOrder);
+        $this->assertArrayHasKey('line_items', $firstOrder);
+        $this->assertCount(2, $firstOrder['line_items']);
+    }
+
+    public function test_repository_uses_streaming_for_json_arrays(): void
+    {
+        // Repository should automatically use streaming when available
+        $orders = $this->repository->findAll();
+        
+        $this->assertInstanceOf(OrderCollection::class, $orders);
+        $this->assertEquals(2, $orders->count());
+        
+        $ordersList = $orders->getOrders();
+        $this->assertEquals('#1001', $ordersList[0]->orderNumber);
+        $this->assertEquals('#1002', $ordersList[1]->orderNumber);
     }
 }

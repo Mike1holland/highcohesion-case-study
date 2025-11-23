@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Adhoc\HighCohesion\Model;
 
-
 abstract class BaseOrder implements TitleInterface
 {
     public function __construct(

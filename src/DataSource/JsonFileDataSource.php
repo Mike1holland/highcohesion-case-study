@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Adhoc\HighCohesion\DataSource;
 
 use Generator;
+use JsonException;
 
 class JsonFileDataSource implements DataSourceInterface
 {
@@ -17,7 +18,7 @@ class JsonFileDataSource implements DataSourceInterface
      * Get all data using pipeline
      * 
      * @return array
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function getAll(): array
     {
@@ -30,7 +31,7 @@ class JsonFileDataSource implements DataSourceInterface
      * 
      * @param string $key
      * @return array|null
-     * @throws \JsonException
+     * @throws JsonException
      */
     public function getOne(string $key): ?array
     {
@@ -47,10 +48,25 @@ class JsonFileDataSource implements DataSourceInterface
     public function stream(): Generator
     {
         $rawData = $this->fetcher->fetch();
-        $data = $this->parser->parse($rawData);
-
-        foreach ($data as $key => $item) {
-            yield $key => $item;
+        
+        // Use streaming parser if available, otherwise fall back to regular parse
+        if ($this->parser instanceof StreamingParserInterface) {
+            yield from $this->parser->parseStream($rawData);
+        } else {
+            $data = $this->parser->parse($rawData);
+            foreach ($data as $key => $item) {
+                yield $key => $item;
+            }
         }
+    }
+
+    /**
+     * Check if this data source supports efficient streaming
+     * 
+     * @return bool
+     */
+    public function supportsStreaming(): bool
+    {
+        return $this->parser instanceof StreamingParserInterface;
     }
 }

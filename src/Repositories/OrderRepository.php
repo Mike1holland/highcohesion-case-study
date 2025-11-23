@@ -36,14 +36,26 @@ class OrderRepository implements OrderRepositoryInterface
 
     /**
      * Get all orders as a collection
+     * Uses streaming if the data source supports it for better memory efficiency
      */
     public function findAll(): OrderCollection
     {
-        $data = $this->dataSource->getAll();
-        $orders = array_map(
-            fn(array $orderData) => $this->mapToOrder($orderData),
-            $data
-        );
+        $orders = [];
+        
+        if ($this->dataSource->supportsStreaming()) {
+            // Use streaming for memory efficiency with large datasets
+            foreach ($this->dataSource->stream() as $orderData) {
+                $orders[] = $this->mapToOrder($orderData);
+            }
+        } else {
+            // Fall back to loading all data at once
+            $data = $this->dataSource->getAll();
+            $orders = array_map(
+                fn(array $orderData) => $this->mapToOrder($orderData),
+                $data
+            );
+        }
+        
         return new OrderCollection($orders);
     }
     

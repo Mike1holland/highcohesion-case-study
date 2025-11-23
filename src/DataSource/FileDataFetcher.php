@@ -6,8 +6,15 @@ namespace Adhoc\HighCohesion\DataSource;
 
 use RuntimeException;
 
+/**
+ * Fetch data from a file
+ */
 class FileDataFetcher implements DataFetcherInterface
 {
+    /**
+     * @param string $filePath
+     * @throws RuntimeException
+     */
     public function __construct(
         private readonly string $filePath
     ) {
