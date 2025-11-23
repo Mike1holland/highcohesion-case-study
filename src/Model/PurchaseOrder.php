@@ -10,11 +10,11 @@ class PurchaseOrder extends BaseOrder
         string $orderNumber,
         string $title,
         string $currency,
-        int $total,
+        int $totalPence,
         public readonly string $vendorId,
         public readonly \DateTimeImmutable $purchaseDate,
-        public readonly string $approvalStatus = 'pending'
+        public readonly string $approvalStatus
     ) {
-        parent::__construct($orderNumber, $title, $currency, $total);
+        parent::__construct($orderNumber, $title, $currency, $totalPence);
     }
 }

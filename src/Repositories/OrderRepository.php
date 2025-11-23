@@ -23,13 +23,15 @@ class OrderRepository implements OrderRepositoryInterface
      */
     public function findById(string $id): ?Order
     {
-        $data = $this->dataSource->getOne($id);
+        $allOrders = $this->dataSource->getAll();
         
-        if ($data === null) {
-            return null;
+        foreach ($allOrders as $orderData) {
+            if ($orderData['order_number'] === $id) {
+                return $this->mapToOrder($orderData);
+            }
         }
         
-        return $this->mapToOrder($data);
+        return null;
     }
 
     /**
@@ -52,8 +54,8 @@ class OrderRepository implements OrderRepositoryInterface
                 sku: $item['sku'],
                 title: $item['title'],
                 quantity: $item['quantity'],
-                price: $item['price'],
-                total: $item['total']
+                pricePence: (int)($item['price'] * 100),
+                totalPence: (int)($item['total'] * 100)
             ),
             $data['line_items']
         );
@@ -62,7 +64,7 @@ class OrderRepository implements OrderRepositoryInterface
             orderNumber: $data['order_number'],
             title: $data['title'],
             currency: $data['currency'],
-            total: $data['total'],
+            totalPence: (int)($data['total'] * 100),
             shippingAddress: new Address(
                 address1: $data['shippingAddress']['address1'],
                 town: $data['shippingAddress']['town'],

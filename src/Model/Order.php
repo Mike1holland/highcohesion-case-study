@@ -10,10 +10,10 @@ class Order extends BaseOrder
         string $orderNumber,
         string $title,
         string $currency,
-        int $total,
+        int $totalPence,
         public readonly Address $shippingAddress,
         public readonly LineItemCollection $lineItems
     ) {
-        parent::__construct($orderNumber, $title, $currency, $total);
+        parent::__construct($orderNumber, $title, $currency, $totalPence);
     }
 }

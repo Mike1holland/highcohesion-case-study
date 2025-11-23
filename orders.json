@@ -1,4 +1,4 @@
-{
+[{
     "order_number": "#1001",
     "title": "#1001-R1",
     "currency": "GBP",
@@ -26,4 +26,4 @@
             "total": 95
         }
     ]
-}
+}]

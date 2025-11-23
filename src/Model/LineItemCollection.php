@@ -56,13 +56,13 @@ class LineItemCollection
     }
 
     /**
-     * Calculate total value of all line items
+     * Calculate total value of all line items in pence
      */
-    public function getTotalValue(): int
+    public function getTotalValuePence(): int
     {
         return array_reduce(
             $this->items,
-            fn(int $carry, LineItem $item) => $carry + $item->total,
+            fn(int $carry, LineItem $item) => $carry + $item->totalPence,
             0
         );
     }

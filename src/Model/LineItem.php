@@ -10,7 +10,7 @@ class LineItem
         public readonly string $sku,
         public readonly string $title,
         public readonly int $quantity,
-        public readonly int $price,
-        public readonly int $total
+        public readonly int $pricePence,
+        public readonly int $totalPence
     ) {}
 }
