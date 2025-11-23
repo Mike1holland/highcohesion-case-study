@@ -1,0 +1,14 @@
+{
+    "name": "adhoc/highcohesion",
+    "description": "High Cohesion E-commerce Order System",
+    "type": "project",
+    "autoload": {
+        "psr-4": {
+            "Adhoc\\HighCohesion\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=8.1"
+    },
+    "require-dev": {}
+}
